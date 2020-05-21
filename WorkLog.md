@@ -1,3 +1,5 @@
+* got first 3d plots to work
+* should try sparse meshgrid
 
 # 2020-05-21 11:26:27.770624: clock-in
 
