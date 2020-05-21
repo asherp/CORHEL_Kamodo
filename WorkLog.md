@@ -1,3 +1,4 @@
+* developing 3d contours
 * attending xsede notebook webinar
 
 # 2020-05-21 13:28:05.178440: clock-in
