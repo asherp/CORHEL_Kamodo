@@ -1,5 +1,10 @@
+
+# 2020-05-22 11:26:23.350529: clock-in
+
 # 2020-05-21 18:04:05.556221: clock-out
 
+* contours are interfering with 3d surface plot
+* trying to match contours with surface plot
 
 # 2020-05-21 16:59:19.694888: clock-in
 
