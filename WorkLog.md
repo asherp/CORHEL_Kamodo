@@ -1,3 +1,6 @@
+
+# 2020-05-26 15:19:58.409924: clock-in
+
 # 2020-05-26 15:06:20.073633: clock-out
 
 * trying to get contour function working
