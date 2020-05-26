@@ -1,3 +1,6 @@
+
+# 2020-05-26 15:49:31.996366: clock-in
+
 # 2020-05-26 15:38:22.439733: clock-out
 
 * got theta as a 2d contour
