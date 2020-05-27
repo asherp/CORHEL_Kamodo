@@ -1,3 +1,4 @@
+* looking at closures
 * cant compose with generator expressions
 
 # 2020-05-27 14:38:53.892886: clock-in
