@@ -1,3 +1,6 @@
+
+# 2020-05-27 14:38:53.892886: clock-in
+
 # 2020-05-27 11:38:08.358790: clock-out
 
 * loaded mas variables
