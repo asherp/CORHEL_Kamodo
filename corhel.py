@@ -2,7 +2,7 @@ from kamodo import Kamodo, kamodofy, gridify
 import psihdf
 from scipy.interpolate import RegularGridInterpolator
 import numpy as np
-import os
+import os, re
 import matplotlib.pyplot as plt
 
 class Spherical(Kamodo):
@@ -82,23 +82,28 @@ def get_contours(x_i,y_j,m_ij,c_vals):
 class CORHEL_Kamodo(Kamodo):
     def __init__(self,
             rundir,
-            mapfl_r1_r0_path = 'cor/mapfl_r1_r0/mapfl.in', 
+            mapfl_r1_r0_path = 'cor/mapfl_r1_r0/mapfl.in',
+            imas_path = 'cor/mhd/imas',
             verbosity = 0,
-            grid = True,
             missing_value = np.nan):
 
         
         self.verbosity = verbosity
         self._rundir = rundir
         self._mapfl_r1_r0_path = mapfl_r1_r0_path
+        self._imas_path = imas_path
+        self._imas = {}
         self._map_data = {}
         self._missing_value = missing_value
         self.load_mapfl_in()
         self.load_mapping()
+
+        self.load_imas()
+        self.register_mas_files()
     
         super(CORHEL_Kamodo, self).__init__() 
         
-        self.register_mapping(grid)
+        self.register_mapping()
 
         
         # register spherical coordinates
@@ -118,7 +123,8 @@ class CORHEL_Kamodo(Kamodo):
         self['p_r0__r1_'] = 'p_r0__r1(phi, theta)'
         self['t_r0__r1_'] = 't_r0__r1(phi, theta)'
         self['r_r0__r1_'] = 'r_r0__r1(phi, theta)'
-        
+
+
     def load_mapfl_in(self):
         mapfl_in_path = '{}/{}'.format(self._rundir, self._mapfl_r1_r0_path)
         
@@ -161,39 +167,104 @@ class CORHEL_Kamodo(Kamodo):
                 except Exception as m:
                     if self.verbosity > 2:
                         print(m)
-                
-    def get_interpolator(self, axes, variable, grid = True):
+
+    def load_imas(self):
+        """Load the imas file"""
+        imas_path = '{}/{}'.format(self._rundir, self._imas_path)
+        self._mhddir = os.path.dirname(os.path.realpath(imas_path))
+
+        with open(imas_path) as f:
+            while True:
+                l = f.readline()
+                if len(l) == 0:
+                    break
+                if l[0] != '!':
+                    if l.strip()[-1] == ',':
+                        l = l.strip() + f.readline().strip()
+                    try: 
+                        var, val = [x.strip() for x in l.split('=')]
+                        if val == '.true.':
+                            val = True
+                        elif val == '.false.':
+                            val = False
+                        elif val[0] == "'":
+                            if ',' in val:
+                                val = [v.strip("'") for v in val.split(',')]
+                            else:
+                                val = val.strip("'")
+                        elif ',' in val:
+                            val = [float(v) for v in val.split(',')]
+                        elif '.' in val:
+                            val = float(val)
+                        else:
+                            val = int(val)
+                        self._imas[var] = val
+                    except:
+                        continue
+        
+    def register_mas_files(self):
+        mas_files = dict()
+        for varname in self._imas['plotlist']:
+            var_files = []
+            for filename in os.listdir(self._mhddir):
+                if 'potfld' in filename:
+                    continue
+                if filename.startswith(varname) & \
+                    filename.endswith('.hdf') & \
+                    (re.search("\d+", filename) is not None):
+                        var_files.append(filename)
+            var_files.sort()
+            mas_files[varname] = var_files
+
+        self._mas_files = mas_files
+
+    def load_mas(self):
+        for varname, files in self._mas_files.items():
+            phi, theta, masvar = psihdf.rdhdf(fname)
+
+            
+    def get_interpolator(self, axes, variable):
         rgi = RegularGridInterpolator(
             axes.values(), 
             variable,
             bounds_error = False,
             fill_value = self._missing_value)
 
-        if grid:
-            def interpolator(rvec):
+        if len(axes) == 2:
+            @gridify(phi_i = axes['phi'], theta_j = axes['theta'])
+            def grid_interpolator(rvec):
                 """Interpolator as a function of axes"""
                 return rgi(rvec)
-            return gridify(interpolator, phi_i = axes['phi'], theta_j = axes['theta'])
-        else:
-            phi_ij, theta_ij = np.meshgrid(axes['phi'], axes['theta'], indexing = 'ij')
-            def interpolator(phi_ij = phi_ij, theta_ij = theta_ij):
-                """Interpolator as a function of axes"""
-                if len(phi_ij.shape) > 1:
-                    points = np.column_stack((phi_ij.ravel(), theta_ij.ravel()))
-                    if self.verbosity > 0:
-                        print('multi-dimensional input to interpolator')
-                        print(phi_ij.shape, theta_ij.shape, points.shape)
-                        print((phi_ij.min(), phi_ij.max()),(theta_ij.min(), theta_ij.max()))
-                    return (rgi(points)).reshape(phi_ij.shape)
+
+            # phi_ij, theta_ij = np.meshgrid(axes['phi'], axes['theta'], indexing = 'ij')
+            def interpolator(phi = axes['phi'], theta = axes['theta']):
+                """Interpolator as a function of phi, theta"""
+                if len(phi.shape) > 1:
+                    points = np.column_stack((phi.ravel(), theta.ravel()))
+                    return (rgi(points)).reshape(phi.shape)
                 else:
-                    if self.verbosity > 0:
-                        print('1-d input to interpolator')
-                    points = np.vstack((phi_ij,theta_ij)).T
-                    return rgi(points)
+                    return grid_interpolator(phi, theta)
+        elif len(axes) == 3:
+            @gridify(phi_i = axes['phi'], theta_j = axes['theta'], r_k = axes['r'])
+            def grid_interpolator(rvec):
+                """Interpolator as a function of axes"""
+                return rgi(rvec)
 
-            return interpolator
+            # phi_ij, theta_ij = np.meshgrid(axes['phi'], axes['theta'], indexing = 'ij')
+            def interpolator(phi_ = axes['phi'], theta_ = axes['theta'], r_ = axes['r']):
+                """Interpolator as a function of phi, theta"""
+                if len(np.array(phi_).shape) > 1:
+                    points = np.column_stack((phi_.ravel(), theta_.ravel(), r_.ravel()))
+                    return (rgi(points)).reshape(phi_.shape)
+                else:
+                    return grid_interpolator(phi_, theta_, r_)
+        else:
+            print('cannot handle axes')
 
-    def register_mapping(self, grid):
+
+        return kamodofy(interpolator)
+
+    def register_mapping(self):
         for key, mapdict in self._map_data.items():
             map_key = key.split('file')[0]
             if map_key[-1] == 'f':
@@ -201,5 +272,5 @@ class CORHEL_Kamodo(Kamodo):
             else:
                 map_suffix = '_r1__r0'
             axes = {k: mapdict[k] for k in ['phi','theta']}
-            self[key[0] + map_suffix] = self.get_interpolator(axes, mapdict['mapvar'], grid)
+            self[key[0] + map_suffix] = self.get_interpolator(axes, mapdict['mapvar'])
         
