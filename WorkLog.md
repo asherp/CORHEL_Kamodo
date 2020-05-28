@@ -1,3 +1,6 @@
+
+# 2020-05-28 09:54:59.456157: clock-in
+
 * testing
 * can register a hidden kamodo object storing cartesian version `_cartesian`, then use closure
 * looking at closures
