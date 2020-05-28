@@ -1,3 +1,5 @@
+# 2020-05-28 13:00:42.064893: clock-out
+
 * trying python-forge to obtain signatures
 * Starting new CORHEL-Kamodo notebook demonstrating usage in r,theta, phi space
 * Contouring
