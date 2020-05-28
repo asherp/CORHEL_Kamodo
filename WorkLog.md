@@ -1,3 +1,4 @@
+* working on vector fields
 * looking at closures
 * cant compose with generator expressions
 

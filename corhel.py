@@ -31,10 +31,21 @@ class Spherical(Kamodo):
         def rvec(xvec):
             return np.vstack((r(xvec).ravel(), theta(xvec).ravel(), phi(xvec).ravel())).T
 
+
+        self['xhat'] = lambda s: np.array([s, 0, 0])
+        self['yhat'] = lambda s: np.array([0, s, 0])
+        self['zhat'] = lambda s: np.array([0, 0, s])
+        self['rhat(phi, theta, s)'] = 'sin(theta)*cos(phi)*xhat + sin(theta)*sin(phi)*yhat + cos(theta)*zhat'
+        self['thetahat(phi, theta, s)'] = 'cos(theta)*cos(phi)*xhat + cos(theta)*sin(phi)*yhat - sin(theta)*zhat'
+        self['phihat(phi, s)'] = '-sin(phi)*xhat + cos(phi)*yhat'
+        self['Avec(A_phi, A_theta, A_r, phi, theta)'] = 'A_r*rhat(phi, theta, 1)+A_theta*thetahat(phi, theta, 1)+A_phi*phihat(phi, 1)'
+
         self['r'] = 'sqrt(x**2 + y**2 + z**2)'
         self['theta'] = 'pi/2 - asin(z/r)'
         self['phi'] = 'pi - atan2(y,x)'
-        self['rvec'] = rvec
+
+
+        
 
 class Cartesian(Kamodo):
     def __init__(self, 
@@ -59,8 +70,8 @@ class Cartesian(Kamodo):
             return r*np.cos(theta)
         
         self['z'] = 'r*sin(pi/2 - theta)'
-        self['x(r,theta, phi)'] = 'r*sin(theta)*cos(pi - phi)'
-        self['y(r,theta, phi)'] = 'r*sin(theta)*sin(pi - phi)'
+        self['x(r,theta, phi)'] = 'r*sin(theta)*cos(phi)'
+        self['y(r,theta, phi)'] = 'r*sin(theta)*sin(phi)'
         self['xvec'] = lambda x, y, z: np.hstack((x.ravel(), y.ravel(), z.ravel()))
 
 def get_contours(x_i,y_j,m_ij,c_vals):
@@ -85,6 +96,7 @@ class CORHEL_Kamodo(Kamodo):
             mapfl_r1_r0_path = 'cor/mapfl_r1_r0/mapfl.in',
             imas_path = 'cor/mhd/imas',
             verbosity = 0,
+            steps = [-1],
             missing_value = np.nan):
 
         
@@ -94,35 +106,38 @@ class CORHEL_Kamodo(Kamodo):
         self._imas_path = imas_path
         self._imas = {}
         self._map_data = {}
+        self._mas_data = {}
         self._missing_value = missing_value
+        self._steps = steps
         self.load_mapfl_in()
         self.load_mapping()
 
         self.load_imas()
         self.register_mas_files()
+        self.load_mas()
     
-        super(CORHEL_Kamodo, self).__init__() 
+        super(CORHEL_Kamodo, self).__init__()
         
         self.register_mapping()
-
+        self.register_mas()
         
-        # register spherical coordinates
-        # use rhs underscores to avoid triggering composition 
-        self['r'] = 'sqrt(x_**2 + y_**2 + z_**2)'
-        self['theta'] = 'pi/2 - asin(z_/r)'
-        self['phi'] = 'pi - atan2(y_,x_)'
+        # # register spherical coordinates
+        # # use rhs underscores to avoid triggering composition 
+        # self['r'] = 'sqrt(x_**2 + y_**2 + z_**2)'
+        # self['theta'] = 'pi/2 - asin(z_/r)'
+        # self['phi'] = 'pi - atan2(y_,x_)'
 
-        # register Cartesian coordinates
-        # make sure lhs ordering is r, theta, phi
-        self['x(r_, theta_, phi_)'] = 'r_*sin(theta_)*cos(pi - phi_)'
-        self['y(r_, theta_, phi_)'] = 'r_*sin(theta_)*sin(pi - phi_)'
-        self['z'] = 'r_*sin(pi/2 - theta_)'
+        # # register Cartesian coordinates
+        # # make sure lhs ordering is r, theta, phi
+        # self['x(r_, theta_, phi_)'] = 'r_*sin(theta_)*cos(pi - phi_)'
+        # self['y(r_, theta_, phi_)'] = 'r_*sin(theta_)*sin(pi - phi_)'
+        # self['z'] = 'r_*sin(pi/2 - theta_)'
 
-        # register cartesian parameters
-        self['e_r0__r1_'] = 'e_r0__r1(phi, theta)'
-        self['p_r0__r1_'] = 'p_r0__r1(phi, theta)'
-        self['t_r0__r1_'] = 't_r0__r1(phi, theta)'
-        self['r_r0__r1_'] = 'r_r0__r1(phi, theta)'
+        # # # register cartesian parameters
+        # # self['e_r0__r1_'] = 'e_r0__r1(phi, theta)'
+        # # self['p_r0__r1_'] = 'p_r0__r1(phi, theta)'
+        # # self['t_r0__r1_'] = 't_r0__r1(phi, theta)'
+        # # self['r_r0__r1_'] = 'r_r0__r1(phi, theta)'
 
 
     def load_mapfl_in(self):
@@ -203,6 +218,7 @@ class CORHEL_Kamodo(Kamodo):
                         continue
         
     def register_mas_files(self):
+        """Register all files in imas plotlist"""
         mas_files = dict()
         for varname in self._imas['plotlist']:
             var_files = []
@@ -219,8 +235,28 @@ class CORHEL_Kamodo(Kamodo):
         self._mas_files = mas_files
 
     def load_mas(self):
+        """Load all regitstered MAS files"""
         for varname, files in self._mas_files.items():
-            phi, theta, masvar = psihdf.rdhdf(fname)
+            for file in [files[i] for i in self._steps]:
+                # parse the step from file names like br001.hdf
+                step = int(file.split(varname)[-1].split('.hdf')[0])
+                if len(self._steps) == 1:
+                    regname = varname
+                else:
+                    regname = '{}_{}'.format(varname, step) 
+                fname = '{}/{}'.format(self._mhddir, file)
+                try:
+                    phi, theta, r, masvar = psihdf.rdhdf(fname)
+                    self._mas_data[regname] = dict(
+                        phi = phi, 
+                        theta = theta, 
+                        r = r, 
+                        masvar = masvar)
+                except Exception as m:
+                    print('could not register {}'.format(regname))
+                    print(m)
+
+
 
             
     def get_interpolator(self, axes, variable):
@@ -251,13 +287,13 @@ class CORHEL_Kamodo(Kamodo):
                 return rgi(rvec)
 
             # phi_ij, theta_ij = np.meshgrid(axes['phi'], axes['theta'], indexing = 'ij')
-            def interpolator(phi_ = axes['phi'], theta_ = axes['theta'], r_ = axes['r']):
+            def interpolator(phi = axes['phi'], theta = axes['theta'], r = axes['r']):
                 """Interpolator as a function of phi, theta"""
-                if len(np.array(phi_).shape) > 1:
-                    points = np.column_stack((phi_.ravel(), theta_.ravel(), r_.ravel()))
-                    return (rgi(points)).reshape(phi_.shape)
+                if len(np.array(phi).shape) > 1:
+                    points = np.column_stack((phi.ravel(), theta.ravel(), r.ravel()))
+                    return (rgi(points)).reshape(phi.shape)
                 else:
-                    return grid_interpolator(phi_, theta_, r_)
+                    return grid_interpolator(phi, theta, r)
         else:
             print('cannot handle axes')
 
@@ -272,5 +308,45 @@ class CORHEL_Kamodo(Kamodo):
             else:
                 map_suffix = '_r1__r0'
             axes = {k: mapdict[k] for k in ['phi','theta']}
-            self[key[0] + map_suffix] = self.get_interpolator(axes, mapdict['mapvar'])
-        
+            # self[key[0] + map_suffix] = self.get_interpolator(axes, mapdict['mapvar'])
+            self[key[0] + map_suffix] = self.get_cartesian_mapping(axes, mapdict['mapvar'])
+    
+
+    def get_cartesian_mapping(self, axes, mapvar):
+        cartesian = Cartesian()
+        interpolator = self.get_interpolator(axes, mapvar)
+
+        def cart_interpolator(phi = axes['phi'], theta = axes['theta'], r = 1.0):
+            pp, tt = [np.squeeze(ar) for ar in np.meshgrid(phi, theta)]
+
+            def sph_to_cart(x = cartesian.x(r, tt, pp),
+                            y = cartesian.y(r, tt, pp),
+                            z = cartesian.z(r, tt)):
+                return np.squeeze(interpolator(pp, tt))
+            yield kamodofy(sph_to_cart)
+        return cart_interpolator
+
+    def get_cartesian(self, axes, masvar, regname):
+        """Create an interpolator that yields cartesian signature"""
+        cartesian = Cartesian()
+        interpolator = self.get_interpolator(axes, masvar)
+
+        def cart_interpolator(phi = axes['phi'], theta = axes['theta'], r = axes['r']):
+            rr, tt, pp = [np.squeeze(ar) for ar in np.meshgrid(r, theta, phi)]
+            
+            def sph_to_cart(x = cartesian.x(rr, tt, pp),
+                            y = cartesian.y(rr, tt, pp),
+                            z = cartesian.z(rr, tt)):
+                return np.squeeze(interpolator(pp, tt, rr))
+            sph_to_cart.__name__ = regname
+            yield kamodofy(sph_to_cart)
+        return cart_interpolator
+
+
+    def register_mas(self):
+        """Register all loaded MAS variables"""
+        for regname, masdict in self._mas_data.items():
+            axes = {k: masdict[k] for k in ['phi', 'theta', 'r']}
+            self[regname] = self.get_interpolator(axes, masdict['masvar'])
+            # self[regname] = self.get_cartesian(axes, masdict['masvar'], regname)
+
