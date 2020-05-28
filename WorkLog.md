@@ -1,3 +1,4 @@
+* components are in different spaces!
 
 # 2020-05-28 13:33:19.162010: clock-in
 
