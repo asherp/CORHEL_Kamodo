@@ -1,3 +1,5 @@
+# 2020-05-27 19:21:55.715068: clock-out
+
 * working on vector fields
 * looking at closures
 * cant compose with generator expressions
