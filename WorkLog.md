@@ -1,6 +1,5 @@
-# 2020-05-27 19:21:55.715068: clock-out
-
-* working on vector fields
+* testing
+* can register a hidden kamodo object storing cartesian version `_cartesian`, then use closure
 * looking at closures
 * cant compose with generator expressions
 
