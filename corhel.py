@@ -1,9 +1,10 @@
-from kamodo import Kamodo, kamodofy, gridify
+from kamodo import Kamodo, kamodofy, gridify, get_defaults
 import psihdf
 from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import os, re
 import matplotlib.pyplot as plt
+import forge
 
 class Spherical(Kamodo):
     def __init__(self,
@@ -97,7 +98,7 @@ class CORHEL_Kamodo(Kamodo):
             imas_path = 'cor/mhd/imas',
             verbosity = 0,
             steps = [-1],
-            missing_value = np.nan):
+            missing_value = np.nan, **kwargs):
 
         
         self.verbosity = verbosity
@@ -115,8 +116,20 @@ class CORHEL_Kamodo(Kamodo):
         self.load_imas()
         self.register_mas_files()
         self.load_mas()
+
+        self._mas_names = dict(
+            bp = 'b_phi',
+            bt = 'b_theta',
+            br = 'b_r',
+            jp = 'j_phi',
+            jt = 'j_theta',
+            jr = 'b_r',
+            vp = 'v_phi',
+            vt = 'v_theta',
+            vr = 'v_r',
+            )
     
-        super(CORHEL_Kamodo, self).__init__()
+        super(CORHEL_Kamodo, self).__init__(**kwargs)
         
         self.register_mapping()
         self.register_mas()
@@ -234,6 +247,7 @@ class CORHEL_Kamodo(Kamodo):
 
         self._mas_files = mas_files
 
+
     def load_mas(self):
         """Load all regitstered MAS files"""
         for varname, files in self._mas_files.items():
@@ -308,8 +322,8 @@ class CORHEL_Kamodo(Kamodo):
             else:
                 map_suffix = '_r1__r0'
             axes = {k: mapdict[k] for k in ['phi','theta']}
-            # self[key[0] + map_suffix] = self.get_interpolator(axes, mapdict['mapvar'])
-            self[key[0] + map_suffix] = self.get_cartesian_mapping(axes, mapdict['mapvar'])
+            self[key[0] + map_suffix] = self.get_interpolator(axes, mapdict['mapvar'])
+            # self[key[0] + map_suffix] = self.get_cartesian_mapping(axes, mapdict['mapvar'])
     
 
     def get_cartesian_mapping(self, axes, mapvar):
@@ -345,8 +359,41 @@ class CORHEL_Kamodo(Kamodo):
 
     def register_mas(self):
         """Register all loaded MAS variables"""
-        for regname, masdict in self._mas_data.items():
+        for varname, masdict in self._mas_data.items():
             axes = {k: masdict[k] for k in ['phi', 'theta', 'r']}
+            regname = self._mas_names.get(varname, varname)
             self[regname] = self.get_interpolator(axes, masdict['masvar'])
             # self[regname] = self.get_cartesian(axes, masdict['masvar'], regname)
 
+
+    def contour(self, varname, **args):
+        defaults = get_defaults(self[varname])
+        for arg, vals in args.items():
+            defaults[arg] = vals
+        result = self[varname](**defaults)
+        c_0 = np.linspace(result.min(), result.max(), 30)
+        new_defaults = {}
+        for k, v in defaults.items():
+            if k not in args:
+                new_defaults[k] = v
+        x_i, y_j = new_defaults.values()
+        new_params = list(new_defaults.keys())
+        def var_contour(c_0 = c_0):
+            if not hasattr(c_0, '__iter__'):
+                c_0 = [c_0]
+            try:
+                try:
+                    t, c1, c2 = get_contours(x_i = x_i, y_j = y_j, m_ij = result, c_vals = c_0)
+                except:
+                    t, c1, c2 = get_contours(x_i = x_i, y_j = y_j, m_ij = result.T, c_vals = c_0)
+            except:
+                print('could not generate contours')
+                print('x_i {}, y_j {}, m_ij {}'.format(x_i.shape, y_j.shape, result.shape))
+                raise
+            @forge.sign(forge.arg(new_params[0], default = c1),
+                        forge.arg(new_params[1], default = c2))
+            def contour_lambda(**kwargs):
+                return t
+            
+            yield kamodofy(contour_lambda)
+        return var_contour
