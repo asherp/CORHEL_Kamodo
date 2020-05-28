@@ -1,3 +1,5 @@
+# 2020-05-28 15:40:45.037364: clock-out
+
 * looking at flux rope designer notes
 * components are in different spaces!
 
