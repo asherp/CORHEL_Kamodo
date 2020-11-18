@@ -1,3 +1,32 @@
+### 2020-11-18 15:05:50.176686: clock-out
+
+Had to run `pip install --upgrade pip setuptools wheel`
+
+#### CORHEL-Kamodo 
+
+Kamodo is an open source python package under development at the Community Coordinated Modeling Center (CCMC). Predictive Science Inc. (PSI) has begun adopting Kamodo as part of its visualization toolset for Corona-Heliosphere (CORHEL), created by PSI and also available at the CCMC. By "Kamodofying" CORHEL's run output, all scientifically relevant fields are registered as interpolating functions with defaults, units, and names suitable for LaTeX legibility. This allows CORHEL fields to be manipulated symbolically, with automated unit conversion, quick-look grahics, dashboards and command line accessibility. The CORHEL-Kamodo interface is tailored for the analysis and visualization of both solar and heliospheric model output.
+
+Kamodo is an open source symbolic python framework that seeks to represent physical data as continuous fields. This formulation enables many common analysis and visualization tasks to be framed in terms of function composition familiar to science users.
+
+
+#### Kamodo basics
+
+In order for discrete model output to be represented as physical continuous fields, each field to is registered as a symbol-interpolating function pair held in a Kamodo object. 
+
+Kamodofying a given model consists of:
+
+1. providing interpolating routines for all scientifically relevant physical fields
+
+2. providing units for each of the above
+
+3. providing default values for arguments to interpolation routines
+
+
+#### User Derived Variables
+
+Science users may register new (derived) variables by referencing previously defined CORHEL fields in their expressions. Such expression may involve coordinate transformations or make use of plasma physics formulary.
+Upon registration of a user expression, users may indicate their prefered units for their derived variables.
+For example, CORHEL-Kamodo registers density in units.
 
 ### 2020-11-18 13:16:01.060176: clock-in
 
