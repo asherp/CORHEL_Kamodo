@@ -1,3 +1,6 @@
+
+### 2020-11-19 13:35:29.860167: clock-in
+
 ### 2020-11-18 21:05:27.360667: clock-out
 
 `@gridify` - had to insert sparse and copy keywords
