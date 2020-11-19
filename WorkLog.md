@@ -1,3 +1,6 @@
+
+### 2020-11-18 19:30:56.358031: clock-in
+
 ### 2020-11-18 15:05:50.176686: clock-out
 
 Had to run `pip install --upgrade pip setuptools wheel`
