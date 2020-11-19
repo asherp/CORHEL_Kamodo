@@ -1,3 +1,29 @@
+### 2020-11-18 21:05:27.360667: clock-out
+
+`@gridify` - had to insert sparse and copy keywords
+
+```python
+# manually generate the appropriate function signature
+grid_wrapper_def = r"""def wrapped({signature}):
+    coordinates = np.meshgrid({arg_str}, indexing = 'xy', sparse = False, copy = False)
+    points = np.column_stack([c.ravel() for c in coordinates])
+    return np.squeeze({fname}(points).reshape(coordinates[0].shape, order = 'A'))
+    """
+```
+
+```python
+def to_agu(corhel):
+	'''prints latex for rendering in agu poster'''
+    print(corhel.to_latex().replace('\\begin{equation}','').replace('\\end{equation}',' \\\\ '))
+```
+
+
+The CORHEL-Kamodo object will be rendered as a list of equations when initialized in a Jupyter notebook. The right-hand side are black-box "lambda" functions pointing to grid interpolators.
+
+```console
+\operatorname{r^{r1}_{r0}}{\left(\phi,\theta \right)} = \lambda{\left(\phi,\theta \right)} \\ \operatorname{t^{r1}_{r0}}{\left(\phi,\theta \right)} = \lambda{\left(\phi,\theta \right)} \\ \operatorname{p^{r1}_{r0}}{\left(\phi,\theta \right)} = \lambda{\left(\phi,\theta \right)} \\ \operatorname{e^{r1}_{r0}}{\left(\phi,\theta \right)} = \lambda{\left(\phi,\theta \right)} \\ \operatorname{r^{r0}_{r1}}{\left(\phi,\theta \right)} = \lambda{\left(\phi,\theta \right)} \\ \operatorname{t^{r0}_{r1}}{\left(\phi,\theta \right)} = \lambda{\left(\phi,\theta \right)} \\ \operatorname{p^{r0}_{r1}}{\left(\phi,\theta \right)} = \lambda{\left(\phi,\theta \right)} \\ \operatorname{e^{r0}_{r1}}{\left(\phi,\theta \right)} = \lambda{\left(\phi,\theta \right)} \\ \operatorname{b_{\theta}}{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ \operatorname{b_{\phi}}{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ \operatorname{b_{r}}{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ \operatorname{j_{\theta}}{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ \operatorname{j_{\phi}}{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ p{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ \rho{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ t{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ \operatorname{v_{r}}{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ \operatorname{v_{\theta}}{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ \operatorname{v_{\phi}}{\left(\phi,\theta,r \right)} = \lambda{\left(\phi,\theta,r \right)} \\ \operatorname{b^{c}_{r}}{\left(c \right)} = \lambda{\left(c \right)}
+```
+
 
 ### 2020-11-18 19:30:56.358031: clock-in
 
