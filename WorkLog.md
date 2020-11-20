@@ -1,3 +1,6 @@
+
+### 2020-11-20 10:39:11.493366: clock-in
+
 ### 2020-11-19 20:03:32.754114: clock-out
 
 * working on field lines
