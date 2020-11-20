@@ -1,3 +1,6 @@
+
+### 2020-11-20 11:09:49.785987: clock-in
+
 ### 2020-11-20 10:53:50.407847: clock-out
 
 * looking at volume rendering with yt
