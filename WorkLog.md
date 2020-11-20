@@ -1,3 +1,6 @@
+
+### 2020-11-20 11:26:20.426302: clock-in
+
 ### 2020-11-20 11:18:49.853476: clock-out
 
 * yt has ability to load spherical data https://yt-project.org/docs/dev/examining/spherical_data.html#loading-spherical-data
