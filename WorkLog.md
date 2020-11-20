@@ -1,3 +1,4 @@
+* working on field lines
 
 ### 2020-11-19 18:45:17.572343: clock-in
 
