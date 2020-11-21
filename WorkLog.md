@@ -1,3 +1,6 @@
+
+### 2020-11-21 14:19:31.935128: clock-in
+
 ### 2020-11-20 18:54:58.901432: clock-out
 
 * got field line traces to render
