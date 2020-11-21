@@ -1,3 +1,6 @@
+* got field line traces to render
+* I don't know how I was able to merge psiweb dev into master without including the `mhdweb` folder!
+
 
 ### 2020-11-20 16:14:26.213620: clock-in
 
