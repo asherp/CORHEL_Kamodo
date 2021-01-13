@@ -1,3 +1,10 @@
+* setting up docker container
+* Mount the run into the container working directory
+
+```console
+cd /Users/asherp/git/psi/report_generator/test/runs/July2017/corhel_run_heating_model_2/ut201707140030-custom/ilabel2_bg/cor
+docker run -it --mount type=bind,source="$(pwd)",destination=/local,consistency=cached -p 8888:8888 asherp/corhel_kamodo
+```
 
 ### 2021-01-13 11:57:30.973046: clock-in
 
