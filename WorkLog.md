@@ -1,3 +1,6 @@
+
+### 2021-01-13 17:29:38.632651: clock-in
+
 ### 2021-01-13 13:01:14.636426: clock-out
 
 * setting up docker container
