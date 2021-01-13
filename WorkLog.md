@@ -1,3 +1,5 @@
+### 2021-01-13 13:01:14.636426: clock-out
+
 * setting up docker container
 * Mount the run into the container working directory
 
