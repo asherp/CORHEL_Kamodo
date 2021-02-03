@@ -1,3 +1,7 @@
+### 2021-02-03 09:37:19.621823: clock-out
+
+* `conda install -c conda-forge idna`
+* `TypeError: Unable to serialise object of type <class 'generator'>`
 
 ### 2021-02-03 08:55:29.193263: clock-in
 
