@@ -1,4 +1,6 @@
-* fixed bug in spherical
+* build docker image, default results are too large
+* building image `docker build -f corhel.Dockerfile -t apembroke/corhel_kamodo .`
+* fixed bug in spherical causing plots to look weird
 
 ### 2021-02-04 09:04:07.040524: clock-in
 
