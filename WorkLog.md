@@ -1,3 +1,6 @@
+
+### 2021-02-04 11:22:21.871343: clock-in
+
 ### 2021-02-04 10:55:47.419293: clock-out
 
 * build docker image, default results are too large
