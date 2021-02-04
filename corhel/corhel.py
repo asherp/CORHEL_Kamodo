@@ -436,7 +436,7 @@ class CORHEL_Kamodo(Kamodo):
             if self._cartesian:
                 self[regname] = kamodofy(self.get_cartesian(axes, masdict['masvar'], regname))
 
-        self['b_r__c'] = self.br_iso
+        self['b_r__c'] = self.get_iso()
 
 
     def contour(self, varname, **args):
@@ -471,33 +471,39 @@ class CORHEL_Kamodo(Kamodo):
             yield kamodofy(contour_lambda)
         return var_contour
 
-    @kamodofy
-    def br_iso(self, c = 0):
-        phi = self._mas_data['br']['phi']
-        theta = self._mas_data['br']['theta']
-        r = self._mas_data['br']['r']
-        br = self._mas_data['br']['masvar']
+    def get_iso(self):
+        """get an isosurface function
+        An isosurface takes a value and yields a mesh-like function
+        """
 
-        # br[nphi, ntheta, nr]
-        # X, Y, Z = np.mgrid[:len(phi), :len(theta), :len(r)] # order?
-        vertices, triangles = mcubes.marching_cubes(br, c)
-        phi_, theta_, r_ = vertices.T
+        @kamodofy(hidden_args=['self'])
+        def br_iso(c=0):
+            phi = self._mas_data['br']['phi']
+            theta = self._mas_data['br']['theta']
+            r = self._mas_data['br']['r']
+            br = self._mas_data['br']['masvar']
 
-        phi_ = np.interp(phi_, range(len(phi)), phi)
-        theta_ = np.interp(theta_, range(len(theta)), theta)
-        r_ = np.interp(r_, range(len(r)), r)
+            # br[nphi, ntheta, nr]
+            # X, Y, Z = np.mgrid[:len(phi), :len(theta), :len(r)] # order?
+            vertices, triangles = mcubes.marching_cubes(br, c)
+            phi_, theta_, r_ = vertices.T
 
-        cartesian = Cartesian()
+            phi_ = np.interp(phi_, range(len(phi)), phi)
+            theta_ = np.interp(theta_, range(len(theta)), theta)
+            r_ = np.interp(r_, range(len(r)), r)
 
-        x = cartesian.x(r_, theta_, phi_)
-        y = cartesian.y(r_, theta_, phi_)
-        z = cartesian.z(r_, theta_)
+            cartesian = Cartesian()
 
-        @kamodofy
-        def isosurface(x=x, y=y, z=z):
-            return triangles
+            x = cartesian.x(r_, theta_, phi_)
+            y = cartesian.y(r_, theta_, phi_)
+            z = cartesian.z(r_, theta_)
 
-        yield isosurface
+            @kamodofy
+            def isosurface(x=x, y=y, z=z):
+                return triangles
+
+            yield isosurface
+        return br_iso
 
     def get_tracer(self):
         # get fields once
