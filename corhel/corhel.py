@@ -72,7 +72,7 @@ class Cartesian(Kamodo):
             r, theta = rvec.T
             return r*np.cos(theta)
 
-        self['z'] = 'r*sin(pi/2 - theta)'
+        self['z(r,theta)'] = 'r*sin(pi/2 - theta)'
         self['x(r,theta, phi)'] = 'r*sin(theta)*cos(phi)'
         self['y(r,theta, phi)'] = 'r*sin(theta)*sin(phi)'
         self['xvec'] = lambda x, y, z: np.hstack((x.ravel(), y.ravel(), z.ravel()))
@@ -292,14 +292,14 @@ class CORHEL_Kamodo(Kamodo):
                 if len(self._steps) == 1:
                     regname = varname
                 else:
-                    regname = '{}_{}'.format(varname, step) 
+                    regname = '{}_{}'.format(varname, step)
                 fname = '{}/{}'.format(self._mhddir, file)
                 try:
                     phi, theta, r, masvar = psihdf.rdhdf(fname)
                     self._mas_data[regname] = dict(
-                        phi=phi, 
-                        theta=theta, 
-                        r=r, 
+                        phi=phi,
+                        theta=theta,
+                        r=r,
                         masvar=masvar)
                 except Exception as m:
                     print('could not register {}'.format(regname))
@@ -323,7 +323,7 @@ class CORHEL_Kamodo(Kamodo):
                 def grid_interpolator(rvec):
                     """Interpolator as a function of axes"""
                     points = np.column_stack((phi.ravel(), theta.ravel()))
-                    return rgi(points) 
+                    return rgi(points)
 
 
             # phi_ij, theta_ij=np.meshgrid(axes['phi'], axes['theta'], indexing='ij')
@@ -395,6 +395,7 @@ class CORHEL_Kamodo(Kamodo):
                 # tt_ = spherical.theta(x, y, z)
                 return np.squeeze(interpolator(pp, tt))
             yield kamodofy(sph_to_cart)
+
         return cart_interpolator
 
     def get_cartesian(self, axes, masvar, regname):
@@ -429,7 +430,7 @@ class CORHEL_Kamodo(Kamodo):
                 print("could not register {}: {}".format(regname, error_msg))
 
             if self._cartesian:
-                self[regname] = self.get_cartesian(axes, masdict['masvar'], regname)
+                self[regname] = kamodofy(self.get_cartesian(axes, masdict['masvar'], regname))
 
         self['b_r__c'] = self.br_iso
 

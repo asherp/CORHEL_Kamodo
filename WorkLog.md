@@ -1,3 +1,4 @@
+* fixed bug in spherical
 
 ### 2021-02-04 09:04:07.040524: clock-in
 
