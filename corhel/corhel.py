@@ -353,7 +353,8 @@ class CORHEL_Kamodo(Kamodo):
                     return result
 
             # phi_ij, theta_ij = np.meshgrid(axes['phi'], axes['theta'], indexing = 'ij')
-            def interpolator(phi = axes['phi'], theta = axes['theta'], r = axes['r']):
+            # def interpolator(phi = axes['phi'], theta = axes['theta'], r = axes['r']):
+            def interpolator(phi = axes['phi'], theta = axes['theta'], r = axes['r'][0]):
                 """Interpolator as a function of phi, theta"""
                 if len(np.array(phi).shape) > 1:
                     points = np.column_stack((phi.ravel(), theta.ravel(), r.ravel()))
@@ -404,7 +405,10 @@ class CORHEL_Kamodo(Kamodo):
         # spherical = Spherical()
         interpolator = self.get_interpolator(axes, masvar)
 
-        def cart_interpolator(phi=axes['phi'], theta=axes['theta'], r=axes['r']):
+        def cart_interpolator(
+            phi=axes['phi'],
+            theta=axes['theta'],
+            r=axes['r'][[0, -1]]):
             rr, tt, pp = [np.squeeze(ar) for ar in np.meshgrid(r, theta, phi)]
 
             def sph_to_cart(x=cartesian.x(rr, tt, pp),
