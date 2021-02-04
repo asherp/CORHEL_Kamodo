@@ -1,3 +1,5 @@
+### 2021-02-04 10:55:47.419293: clock-out
+
 * build docker image, default results are too large
 * building image `docker build -f corhel.Dockerfile -t apembroke/corhel_kamodo .`
 * fixed bug in spherical causing plots to look weird
