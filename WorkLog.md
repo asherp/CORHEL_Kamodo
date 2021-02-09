@@ -1,3 +1,5 @@
+### 2021-02-09 17:49:34.460096: clock-out
+
 * added figure rescaling functions
 
 ### 2021-02-09 17:20:29.394866: clock-in
