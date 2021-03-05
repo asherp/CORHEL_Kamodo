@@ -93,29 +93,6 @@ def get_contours(x_i,y_j,m_ij,c_vals):
     return t_vals, theta_, phi_
 
 
-def get_bbox(fig):
-    t0 = fig['data'][0]
-    xmin = np.nanmin(t0['x'])
-    xmax = np.nanmax(t0['x'])
-    ymin = np.nanmin(t0['y'])
-    ymax = np.nanmax(t0['y'])
-    zmin = np.nanmin(t0['z'])
-    zmax = np.nanmax(t0['z'])
-    for t in fig['data']:
-        xmin = min(xmin, np.nanmin(t['x']))
-        xmax = max(xmax, np.nanmax(t['x']))
-        ymin = min(ymin, np.nanmin(t['y']))
-        ymax = max(ymax, np.nanmax(t['y']))
-        zmin = min(zmin, np.nanmin(t['z']))
-        zmax = max(zmax, np.nanmax(t['z']))
-    return xmin, xmax, ymin, ymax, zmin, zmax
-
-def set_aspect(fig):
-    fig.layout.scene.aspectmode='manual'
-    xmin, xmax, ymin, ymax, zmin, zmax = get_bbox(fig)
-    fig.layout.scene.aspectratio=dict(x=xmax-xmin, y=ymax-ymin,z=zmax-zmin)
-    return fig
-
 def rescale_color(fig):
     cmin, cmax = np.nan, np.nan
     for t in fig['data']:
@@ -129,10 +106,19 @@ def rescale_color(fig):
     return fig
 
 class CORHEL_Kamodo(Kamodo):
+    '''CORHEL simulation output
+
+    CORHEL - for Corona-Heliosphere - is a coupled set of models and tools for quantitatively modeling
+    the ambient solar corona and solar wind in various approximations. It includes the MHD model MAS, 
+    and a heliospheric version of MAS. The primary data input to CORHEL consists
+    of maps of the Sun's photospheric magnetic field derived from magnetograms.
+    '''
     def __init__(self,
                  rundir,
                  mapfl_r1_r0_path='cor/mapfl_r1_r0/mapfl.in',
                  mhd_path='cor/mhd',
+                 load_imas=True,
+                 imas_path=None,
                  verbosity=0,
                  steps=(-1,),
                  missing_value=np.nan,
@@ -147,6 +133,7 @@ class CORHEL_Kamodo(Kamodo):
         self._mapfl_r1_r0_path = mapfl_r1_r0_path
         self._mhd_path = mhd_path
         self._imas = {}
+        self._imas_path = imas_path
         self._map_data = {}
         self._mas_data = {}
         self._missing_value = missing_value
@@ -158,8 +145,8 @@ class CORHEL_Kamodo(Kamodo):
         self._gridify = gridify_interpolators
         self.load_mapfl_in()
         self.load_mapping()
-
-        self.load_imas()
+        if load_imas:
+            self.load_imas()
         self.register_mas_files()
         self.load_mas()
 
@@ -169,10 +156,27 @@ class CORHEL_Kamodo(Kamodo):
             br='b_r',
             jp='j_phi',
             jt='j_theta',
-            jr='b_r',
+            jr='j_r',
             vp='v_phi',
             vt='v_theta',
             vr='v_r',
+            )
+        self._mas_docs = dict(
+            bp='phi component of magnetic field',
+            bt='theta component of magnetic field',
+            br='r component of magnetic field',
+            jp='phi component of current',
+            jt='theta component of current',
+            jr='r component of current',
+            vp='phi component of velocity',
+            vt='theta component of velocity',
+            vr='r component of velocity',
+            rho='density',
+            p='pressure',
+            t='temperature',
+            heat='heat flux',
+            em='magnetic engery',
+            ep='plasma energy',
             )
 
         super(CORHEL_Kamodo, self).__init__(**kwargs)
@@ -254,7 +258,10 @@ class CORHEL_Kamodo(Kamodo):
 
     def load_imas(self):
         """Load the imas file"""
-        imas_path = '{}/{}/imas'.format(self._rundir, self._mhd_path)
+        if self._imas_path is None:
+            imas_path = '{}/{}/imas'.format(self._rundir, self._mhd_path)
+        else:
+            imas_path = self._imas_path
         self._mhddir = os.path.dirname(os.path.realpath(imas_path))
 
         with open(imas_path) as f:
@@ -373,7 +380,7 @@ class CORHEL_Kamodo(Kamodo):
         elif len(axes) == 3:
 
             if self._gridify:
-                @gridify(phi_i = axes['phi'], theta_j = axes['theta'], r_k = axes['r'])
+                @gridify(phi_i = axes['phi'], theta_j = axes['theta'], r_k = axes['r'][::10])
                 def grid_interpolator(rvec):
                     """Interpolator as a function of axes"""
                     # num_size_1 = [np.size(ptr_) for ptr_ in (phi_i, theta_j, r_k)].count((1,))
@@ -389,8 +396,8 @@ class CORHEL_Kamodo(Kamodo):
 
             # phi_ij, theta_ij = np.meshgrid(axes['phi'], axes['theta'], indexing = 'ij')
             # def interpolator(phi = axes['phi'], theta = axes['theta'], r = axes['r']):
-            def interpolator(phi = axes['phi'], theta = axes['theta'], r = axes['r'][0]):
-                """Interpolator as a function of phi, theta"""
+            def interpolator(phi = axes['phi'], theta = axes['theta'], r = axes['r'][::10]):
+                """Interpolator as a function of phi, theta, r"""
                 if len(np.array(phi).shape) > 1:
                     points = np.column_stack((phi.ravel(), theta.ravel(), r.ravel()))
                     return (rgi(points)).reshape(phi.shape)
@@ -411,9 +418,8 @@ class CORHEL_Kamodo(Kamodo):
                 map_suffix = '_r1__r0'
             axes = {k: mapdict[k] for k in ['phi', 'theta']}
             if self._cartesian:
-                self[key[0] + map_suffix] = self.get_cartesian_mapping(axes, mapdict['mapvar'])
-            else:
-                self[key[0] + map_suffix] = self.get_interpolator(axes, mapdict['mapvar'])
+                self[key[0] + map_suffix + '__cart'] = self.get_cartesian_mapping(axes, mapdict['mapvar'])
+            self[key[0] + map_suffix] = self.get_interpolator(axes, mapdict['mapvar'])
 
 
     def get_cartesian_mapping(self, axes, mapvar):
@@ -463,13 +469,20 @@ class CORHEL_Kamodo(Kamodo):
         for varname, masdict in self._mas_data.items():
             axes = {k: masdict[k] for k in ['phi', 'theta', 'r']}
             regname = self._mas_names.get(varname, varname)
+
+            vardocs = self._mas_docs.get(varname,
+                'corhel variable {}'.format(varname))
             try:
-                self[regname] = self.get_interpolator(axes, masdict['masvar'])
+                func = self.get_interpolator(axes, masdict['masvar'])
+                func.__doc__ = '{}\n{}'.format(vardocs, func.__doc__)
+                self[regname] = func
             except ValueError as error_msg:
                 print("could not register {}: {}".format(regname, error_msg))
 
             if self._cartesian:
-                self[regname] = kamodofy(self.get_cartesian(axes, masdict['masvar'], regname))
+                self[regname + '__cart'] = kamodofy(
+                    self.get_cartesian(axes, masdict['masvar'], regname),
+                    citation=vardocs)
 
         self['b_r__c'] = self.get_iso()
 
@@ -491,9 +504,9 @@ class CORHEL_Kamodo(Kamodo):
                 c_0 = [c_0]
             try:
                 try:
-                    t, c1, c2 = get_contours(x_i = x_i, y_j = y_j, m_ij = result, c_vals = c_0)
+                    t, c1, c2 = get_contours(x_i=x_i, y_j=y_j, m_ij=result, c_vals=c_0)
                 except:
-                    t, c1, c2 = get_contours(x_i = x_i, y_j = y_j, m_ij = result.T, c_vals = c_0)
+                    t, c1, c2 = get_contours(x_i=x_i, y_j=y_j, m_ij=result.T, c_vals=c_0)
             except:
                 print('could not generate contours')
                 print('x_i {}, y_j {}, m_ij {}'.format(x_i.shape, y_j.shape, result.shape))
@@ -515,8 +528,8 @@ class CORHEL_Kamodo(Kamodo):
         def br_iso(c=0):
             phi = self._mas_data['br']['phi']
             theta = self._mas_data['br']['theta']
-            r = self._mas_data['br']['r']
-            br = self._mas_data['br']['masvar']
+            r = self._mas_data['br']['r'][:-5]
+            br = self._mas_data['br']['masvar'][:,:,:-5]
 
             # br[nphi, ntheta, nr]
             # X, Y, Z = np.mgrid[:len(phi), :len(theta), :len(r)] # order?
