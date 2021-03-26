@@ -1,3 +1,4 @@
+* updating base kamodo container version
 ### 2021-03-05 12:43:27.494944: clock-out: T-25m 
 
 * setting up simple interpolator

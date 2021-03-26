@@ -3,7 +3,7 @@ LABEL maintainer "Asher Pembroke <apembroke@predsci.com>"
 
 
 # install corhel-kamodo
-WORKDIR Kamodo/readers/corhel
+WORKDIR /Kamodo/readers/corhel
 ADD . Kamodo/readers/corhel
 RUN conda install -c conda-forge pyhdf
 RUN pip install -e Kamodo/readers/corhel

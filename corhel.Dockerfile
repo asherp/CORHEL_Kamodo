@@ -1,4 +1,4 @@
-FROM apembroke/kamodo:0.1
+FROM apembroke/kamodo:0.3
 
 # RUN git clone https://github.com/asherp/Kamodo.git
 # RUN pip install -e Kamodo
