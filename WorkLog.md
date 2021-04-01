@@ -1,3 +1,6 @@
+
+### 2021-04-01 10:43:48.197848: clock-in
+
 ### 2021-03-31 18:23:38.650528: clock-out
 
 * moving data into dask/xarray
