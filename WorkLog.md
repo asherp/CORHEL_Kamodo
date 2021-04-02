@@ -1,3 +1,6 @@
+
+### 2021-04-02 11:25:16.243787: clock-in
+
 ### 2021-04-01 19:07:44.677278: clock-out
 
 * bind mounts vs volumes https://4sysops.com/archives/introduction-to-docker-bind-mounts-and-volumes/
