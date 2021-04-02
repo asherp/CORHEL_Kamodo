@@ -1,3 +1,23 @@
+### 2021-04-01 19:07:44.677278: clock-out
+
+* bind mounts vs volumes https://4sysops.com/archives/introduction-to-docker-bind-mounts-and-volumes/
+
+bind mounts are the same as -v /my/host/path:/container/path
+
+Got dask to share data
+
+`docker-compose up --scale worker=6`
+
+`pip install git+https://github.com/fujiisoup/xr-scipy.git`
+
+* tried this
+```from xrscipy.interpolate import RegularGridInterpolator as xaRegularGridInterpolator```
+
+* [pyinterp](https://pangeo-pyinterp.readthedocs.io/en/latest/index.html): lots of interpolation libraries all rolled into one!
+Unfortunately may need to build this by hand
+```console
+ImportError: /opt/conda/lib/python3.7/site-packages/zmq/backend/cython/../../../../.././libstdc++.so.6: version `GLIBCXX_3.4.26' not found (required by /opt/conda/lib/python3.7/site-packages/pyinterp/core.cpython-37m-x86_64-linux-gnu.so)
+```
 
 ### 2021-04-01 17:16:20.276714: clock-in
 
