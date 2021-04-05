@@ -1,3 +1,6 @@
+
+### 2021-04-05 11:55:34.655431: clock-in
+
 ### 2021-04-02 15:06:54.383176: clock-out
 
 * got spacetime domain across multiple workers
