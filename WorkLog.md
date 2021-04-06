@@ -1,3 +1,5 @@
+* got point interpolation working on dask cluster
+`docker-compose up --scale worker=6`
 
 ### 2021-04-06 12:18:06.677667: clock-in
 
