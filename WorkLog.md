@@ -1,3 +1,6 @@
+
+### 2021-04-12 18:34:46.165005: clock-in
+
 ### 2021-04-09 13:06:37.904612: clock-out
 
 * added notebook for running mapfl in predsi/psiweb
