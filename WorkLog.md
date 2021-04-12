@@ -1,3 +1,4 @@
+* looking at legate core
 
 ### 2021-04-12 18:34:46.165005: clock-in
 
