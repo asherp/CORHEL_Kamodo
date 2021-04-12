@@ -1,4 +1,6 @@
-* looking at legate core
+### 2021-04-12 18:48:58.311015: clock-out
+
+* looking at legate core https://github.com/nv-legate/legate.numpy
 
 ### 2021-04-12 18:34:46.165005: clock-in
 
