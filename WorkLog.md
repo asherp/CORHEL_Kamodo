@@ -1,3 +1,5 @@
+### 2021-04-22 13:07:09.455782: clock-out
+
 * looking at more numpy parallel libraries
 pnumpy
 * https://quansight.github.io/pnumpy/stable/index.html
