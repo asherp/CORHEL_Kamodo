@@ -1,3 +1,27 @@
+* looking at more numpy parallel libraries
+pnumpy
+* https://quansight.github.io/pnumpy/stable/index.html
+* I'm not able to see a significant speed improvement with my tests. 
+* This issue mentions how pnumpy would fit into numpy natively in contrast to dask. https://github.com/numpy/numpy/issues/18028
+
+Clearlinux
+* looked at clearlinux/numpy-mp for parallel numpy https://github.com/clearlinux/dockerfiles/tree/master/numpy-mp
+* numpy-mp Explainer article here https://clearlinux.org/blogs-news/improving-python-numpy-performance-kubernetes-using-clear-linux-os
+
+
+Legate
+* creating legate conda environment. legate.numpy removed their dockerfiles
+* created issue on their github
+* installing legate.numpy into new conda environment
+
+```console
+conda env create -n legate -f conda/legate_numpy_dev.yml
+conda activate legate
+python setup.py --with-core /Users/asherp/miniconda3/envs/legate
+```
+* last step would not complete
+
+
 
 ### 2021-04-22 11:27:19.518453: clock-in
 
