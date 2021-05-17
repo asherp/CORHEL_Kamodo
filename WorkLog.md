@@ -1,3 +1,6 @@
+
+### 2021-05-17 16:30:55.291775: clock-in
+
 ### 2021-05-17 14:06:36.434041: clock-out
 
 * adding run conversion script
