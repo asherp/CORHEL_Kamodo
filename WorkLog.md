@@ -1,3 +1,6 @@
+
+### 2021-05-17 13:32:04.149842: clock-in
+
 ### 2021-04-22 13:07:09.455782: clock-out
 
 * looking at more numpy parallel libraries
