@@ -1,0 +1,42 @@
+site_name: psiweb
+site_dir: site
+
+nav:
+  - Home: README.ipynb
+  - Slices: Slices.md
+
+theme:
+  name: material
+  # name: readthedocs
+  favicon: images/logo.ico
+
+markdown_extensions:
+  - markdown_include.include
+  - admonition
+  - codehilite
+  - toc:
+      permalink: "#"
+  - mdx_math:
+      enable_dollar_delimiter: True 
+  - pymdownx.details
+  - pymdownx.tasklist
+
+extra_javascript: 
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+  - mathjax-refresh.js
+
+
+
+extra_css:
+  # - assets/css/asciinema-player.css
+
+
+plugins:
+  - mknotebooks:
+      execute: false
+  # - mkdocs-jupyter:
+  #     execute: False
+  #     include_source: True
+  - search
+  # - encryptcontent:
+  #     global_password: ''

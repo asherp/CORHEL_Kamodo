@@ -1,4 +1,6 @@
+* creating documentation site
 * adding docker entrypoint
+* mathjax difficulties - not sure why kamodo equations are not rendering. here's another mathjax plugin https://squidfunk.github.io/mkdocs-material/reference/mathjax/
 
 ### 2021-05-18 12:20:41.321167: clock-in
 
