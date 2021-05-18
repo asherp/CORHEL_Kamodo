@@ -1,3 +1,4 @@
+* adding docker entrypoint
 
 ### 2021-05-18 12:20:41.321167: clock-in
 
