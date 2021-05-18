@@ -1,3 +1,6 @@
+
+### 2021-05-18 17:14:04.431893: clock-in
+
 ### 2021-05-18 14:16:45.684997: clock-out
 
 * creating documentation site
