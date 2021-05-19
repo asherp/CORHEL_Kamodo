@@ -1,4 +1,6 @@
-* kamodofying parallel dask slicer
+### 2021-05-19 17:54:22.783798: clock-out
+
+* kamodofying parallel dask slicer - bug in kamodofy
 
 ### 2021-05-19 16:06:00.071139: clock-in
 
