@@ -1,3 +1,4 @@
+* kamodofying parallel dask slicer
 
 ### 2021-05-19 16:06:00.071139: clock-in
 
