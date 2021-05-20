@@ -28,7 +28,7 @@ class Spherical(Kamodo):
         # @gridify(x = x, y = y)
         def phi(xvec):
             x, y, z = xvec.T
-            return np.arctan2(y,x)
+            return np.arctan2(y, x)
 
         @kamodofy(equation = '$\\vec{r}(\\vec{x}) = r(\\vec{x}), \\theta(\\vec{x}), \\phi(\\vec{x})$')
         def rvec(xvec):
@@ -126,6 +126,7 @@ class CORHEL_Kamodo(Kamodo):
                  variables=None,
                  view_file='view_info.json',
                  gridify_interpolators=True,
+                 register_isosurface=True,
                  **kwargs):
 
         self.verbosity = verbosity
@@ -141,6 +142,7 @@ class CORHEL_Kamodo(Kamodo):
         self._cartesian = cartesian
         self._variables = variables
         self._view_file = view_file
+        self.register_isosurface = register_isosurface
         self._flux_rope_view = self.load_view()
         self._gridify = gridify_interpolators
         self.load_mapfl_in()
@@ -324,14 +326,18 @@ class CORHEL_Kamodo(Kamodo):
                 files = self._mas_files[varname]
             except KeyError:
                 raise KeyError('{} not found. Available fields: {}'.format(varname, list(self._mas_files.keys())))
-            for file in [files[i] for i in self._steps]:
+            if self._steps is None:
+                steps = np.arange(len(files))
+            else:
+                steps = self._steps
+            for file in [files[i] for i in steps]:
                 # parse the step from file names like br001.hdf
                 try:
                     step = int(file.split(varname)[-1].split('.hdf')[0])
                 except:
                     print('issue with varname {}, file: {}, skipping'.format(varname, file))
                     pass
-                if len(self._steps) == 1:
+                if len(steps) == 1:
                     regname = varname
                 else:
                     regname = '{}_{}'.format(varname, step)
@@ -427,7 +433,7 @@ class CORHEL_Kamodo(Kamodo):
         # spherical = Spherical()
         interpolator = self.get_interpolator(axes, mapvar)
 
-        def cart_interpolator(phi = axes['phi'], theta = axes['theta'], r = 1.0):
+        def cart_interpolator(phi=axes['phi'], theta=axes['theta'], r=1.0):
             pp, tt = [np.squeeze(ar) for ar in np.meshgrid(phi, theta)]
 
             def sph_to_cart(x=cartesian.x(r, tt, pp),
@@ -484,7 +490,8 @@ class CORHEL_Kamodo(Kamodo):
                     self.get_cartesian(axes, masdict['masvar'], regname),
                     citation=vardocs)
 
-        self['b_r__c'] = self.get_iso()
+        if self.register_isosurface:
+            self['b_r__c'] = self.get_iso()
 
 
     def contour(self, varname, **args):
@@ -678,5 +685,16 @@ class CORHEL_Kamodo(Kamodo):
     #             self[regname] = self.get_cartesian(axes, masdict['masvar'], regname)
 
     #     self['b_r__c'] = self.br_iso
+
+class CORHEL_KamodoT(Kamodo):
+    """Time interpolator class for CORHEL
+    There is too much data to fit in memory. Maybe we can take advantage of dask parallelization
+    to offload the interpolations
+    """
+    def __init__(self, rundir, **kwargs):
+        super(CORHEL_KamodoT, self).__init__(**kwargs)
+
+
+
 
 

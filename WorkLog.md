@@ -1,3 +1,6 @@
+* got numpy array back from interpolated slice
+* `NotImplementedError: No way to handle out_shape (259, 195), with arg shapes:((1,), (1,), (195,), (259,))
+`
 
 ### 2021-05-20 15:31:10.366153: clock-in
 
