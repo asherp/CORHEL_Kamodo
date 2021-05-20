@@ -1,3 +1,6 @@
+### 2021-05-20 12:27:56.193794: clock-out
+
+* tring to pull interpolated results from dask. something weird with h5. Try netcdf?
 
 ### 2021-05-20 10:20:11.468816: clock-in
 
