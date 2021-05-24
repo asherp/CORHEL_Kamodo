@@ -1,3 +1,6 @@
+
+### 2021-05-24 16:53:33.671538: clock-in
+
 ### 2021-05-20 16:56:24.693099: clock-out
 
 * got numpy array back from interpolated slice
