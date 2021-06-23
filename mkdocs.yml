@@ -2,13 +2,15 @@ site_name: psiweb
 site_dir: site
 
 nav:
-  - Home: README.ipynb
+  - Home: README.md
   - Slices: Slices.md
 
 theme:
   name: material
   # name: readthedocs
   favicon: images/logo.ico
+  features:
+    - navigation.instant
 
 markdown_extensions:
   - markdown_include.include
@@ -22,10 +24,9 @@ markdown_extensions:
   - pymdownx.tasklist
 
 extra_javascript: 
-  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"
   - mathjax-refresh.js
-
-
+    
 
 extra_css:
   # - assets/css/asciinema-player.css
