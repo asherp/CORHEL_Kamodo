@@ -149,6 +149,8 @@ class CORHEL_Kamodo(Kamodo):
         self.load_mapping()
         if load_imas:
             self.load_imas()
+        else:
+            self._mhddir = "{}/{}".format(rundir, mhd_path)
         self.register_mas_files()
         self.load_mas()
 
@@ -298,7 +300,11 @@ class CORHEL_Kamodo(Kamodo):
     def register_mas_files(self):
         """Register all files in imas plotlist"""
         mas_files = dict()
-        for varname in self._imas['plotlist']:
+        if 'plotlist' in self._imas:
+            varnames = self._imas['plotlist']
+        else:
+            varnames = ['br', 'bt', 'bp']
+        for varname in varnames:
             var_files = []
             for filename in os.listdir(self._mhddir):
                 if 'potfld' in filename:
