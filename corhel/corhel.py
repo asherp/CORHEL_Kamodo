@@ -127,6 +127,7 @@ class CORHEL_Kamodo(Kamodo):
                  view_file='view_info.json',
                  gridify_interpolators=True,
                  register_isosurface=True,
+                 squeeze_cartesian=True,
                  **kwargs):
 
         self.verbosity = verbosity
@@ -142,6 +143,7 @@ class CORHEL_Kamodo(Kamodo):
         self._cartesian = cartesian
         self._variables = variables
         self._view_file = view_file
+        self._squeeze_cartesian = squeeze_cartesian
         self.register_isosurface = register_isosurface
         self._flux_rope_view = self.load_view()
         self._gridify = gridify_interpolators
@@ -461,16 +463,25 @@ class CORHEL_Kamodo(Kamodo):
         def cart_interpolator(
             phi=axes['phi'],
             theta=axes['theta'],
-            r=axes['r'][[0, -1]]):
-            rr, tt, pp = [np.squeeze(ar) for ar in np.meshgrid(r, theta, phi)]
-
-            def sph_to_cart(x=cartesian.x(rr, tt, pp),
-                            y=cartesian.y(rr, tt, pp),
-                            z=cartesian.z(rr, tt)):
-                # rr_ = spherical.r(x, y, z)
-                # pp_ = spherical.phi(x, y)
-                # tt_ = spherical.theta(x, y, z)
-                return np.squeeze(interpolator(pp, tt, rr))
+            r=axes['r']):
+            if self._squeeze_cartesian:
+                rr, tt, pp = [np.squeeze(ar) for ar in np.meshgrid(r, theta, phi)]
+                def sph_to_cart(x=cartesian.x(rr, tt, pp),
+                                y=cartesian.y(rr, tt, pp),
+                                z=cartesian.z(rr, tt)):
+                    # rr_ = spherical.r(x, y, z)
+                    # pp_ = spherical.phi(x, y)
+                    # tt_ = spherical.theta(x, y, z)
+                    return np.squeeze(interpolator(pp, tt, rr))
+            else:
+                rr, tt, pp = np.meshgrid(r, theta, phi)
+                def sph_to_cart(x=cartesian.x(rr, tt, pp),
+                                y=cartesian.y(rr, tt, pp),
+                                z=cartesian.z(rr, tt)):
+                    # rr_ = spherical.r(x, y, z)
+                    # pp_ = spherical.phi(x, y)
+                    # tt_ = spherical.theta(x, y, z)
+                    return interpolator(pp, tt, rr)
             sph_to_cart.__name__ = regname
             yield kamodofy(sph_to_cart)
         return cart_interpolator
@@ -673,25 +684,7 @@ class CORHEL_Kamodo(Kamodo):
                     yield f_B
 
         return f
-
-    # def bvec(self, x,y,z):
-    #     interpolator = self.get_interpolator(axes, masvar)
-
-    #     get_interpolator
-
-    #     for varname, masdict in self._mas_data.items():
-    #         axes = {k: masdict[k] for k in ['phi', 'theta', 'r']}
-    #         regname = self._mas_names.get(varname, varname)
-    #         try:
-    #             self[regname] = self.get_interpolator(axes, masdict['masvar'])
-    #         except ValueError as error_msg:
-    #             print("could not register {}: {}".format(regname, error_msg))
-
-    #         if self._cartesian:
-    #             self[regname] = self.get_cartesian(axes, masdict['masvar'], regname)
-
-    #     self['b_r__c'] = self.br_iso
-
+        
 class CORHEL_KamodoT(Kamodo):
     """Time interpolator class for CORHEL
     There is too much data to fit in memory. Maybe we can take advantage of dask parallelization

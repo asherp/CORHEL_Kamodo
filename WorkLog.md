@@ -1,3 +1,4 @@
+* fixing r range interpolation
 * allow skipping of plotlist
 * pushing latest
 
